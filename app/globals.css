@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 1rem;
+}
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+.shadow-card { @apply shadow-sm hover:shadow-md transition-shadow; }
+.btn { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium; }
+.btn-default { @apply bg-gray-900 text-white hover:bg-gray-800; }
+.btn-outline { @apply border border-gray-300 hover:bg-gray-100; }
+.btn-destructive { @apply bg-red-600 text-white hover:bg-red-700; }
+.input { @apply w-full rounded-xl border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300; }
+.card { @apply rounded-2xl bg-white shadow-sm; }
+.card-content { @apply p-5; }
+.tablist { @apply inline-flex gap-2 bg-gray-100 rounded-xl p-1; }
+.tabtrigger { @apply px-3 py-1.5 text-sm rounded-lg data-[active=true]:bg-white data-[active=true]:shadow; }
+.table { @apply w-full text-sm; }
+.table th { @apply text-left font-semibold text-gray-600 pb-2; }
+.table td { @apply py-2; }
+.select { @apply border border-gray-300 rounded-xl px-3 py-2 text-sm; }
+.switch { @apply relative w-10 h-6 bg-gray-300 rounded-full transition-colors; }
+.switch[data-checked=true] { @apply bg-gray-900; }
+.switch-knob { @apply absolute top-0.5 left-0.5 h-5 w-5 bg-white rounded-full transition-transform; }
+.switch[data-checked=true] .switch-knob { transform: translateX(1rem); }
+.toast-wrap { @apply fixed top-4 right-4 space-y-2 z-50; }
+.toast { @apply rounded-xl bg-gray-900 text-white px-4 py-2 text-sm shadow-lg; }
+.toast[data-variant=destructive] { @apply bg-red-600; }
