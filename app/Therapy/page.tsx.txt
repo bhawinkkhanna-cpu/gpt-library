@@ -1,0 +1,101 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+export default function TherapyPage() {
+  const userId = "demo-user"; // later replace with Supabase auth
+  const agent = "therapy";
+
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadMemory = async () => {
+      const res = await fetch(`/api/memory?userId=${userId}&agent=${agent}`);
+      const data = await res.json();
+      if (data.messages.length > 0) {
+        setMessages([
+          ...data.messages,
+          { role: "assistant", content: "🧠 Welcome back. How are you feeling today? Want to continue our last talk?" }
+        ]);
+      } else {
+        setMessages([{ role: "assistant", content: "🧠 Hi! I’m your Therapy Companion. I can help with stress relief, journaling, and mindfulness." }]);
+      }
+    };
+    loadMemory();
+  }, []);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    const newMessages = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: newMessages }),
+    });
+
+    if (!res.body) return;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let partial = "";
+
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      partial += decoder.decode(value, { stream: true });
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: "assistant", content: partial };
+        return updated;
+      });
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="p-4 bg-gradient-to-r from-purple-300 to-purple-400 text-white font-semibold text-lg shadow">
+        🧠 Therapy Companion
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`max-w-xs p-3 rounded-xl ${
+              msg.role === "user" ? "ml-auto bg-blue-500 text-white" : "mr-auto bg-white text-gray-800 shadow"
+            }`}
+          >
+            {msg.content}
+          </div>
+        ))}
+        {loading && <div className="mr-auto bg-white text-gray-400 p-3 rounded-xl shadow animate-pulse">Typing...</div>}
+      </div>
+
+      <div className="p-4 bg-white border-t flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Share what’s on your mind..."
+          className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+        />
+        <button
+          onClick={handleSend}
+          disabled={loading}
+          className="px-4 py-2 bg-gradient-to-r from-purple-400 to-purple-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}

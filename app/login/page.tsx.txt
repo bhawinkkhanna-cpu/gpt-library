@@ -1,0 +1,61 @@
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleMagicLink = async () => {
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) {
+      setMessage("⚠️ " + error.message);
+    } else {
+      setMessage("✅ Check your email for the login link.");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` }
+    });
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
+      <h1 className="text-2xl font-bold mb-6">Sign In</h1>
+
+      <p className="text-gray-600 mb-6 text-center max-w-sm">
+        🔑 Please log in so your chats can be <b>saved and personalized</b>.
+        You can use your email or sign in with Google.
+      </p>
+
+      {/* Email magic link */}
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
+        className="border rounded-lg px-4 py-2 mb-4 w-64"
+      />
+      <button
+        onClick={handleMagicLink}
+        className="px-6 py-2 bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-lg shadow mb-4"
+      >
+        Send Login Link
+      </button>
+
+      {/* Google SSO */}
+      <button
+        onClick={handleGoogleLogin}
+        className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow"
+      >
+        Continue with Google
+      </button>
+
+      {message && <p className="mt-4 text-sm text-gray-600">{message}</p>}
+    </div>
+  );
+}
